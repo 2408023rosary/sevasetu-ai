@@ -5,3 +5,4 @@ pydantic
 pytest
 pillow
 python-multipart
+httpx

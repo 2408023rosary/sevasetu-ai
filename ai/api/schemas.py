@@ -13,4 +13,4 @@ class AnalysisResponse(BaseModel):
     priority_score: float
     priority_reasons: list[str]
     image_analysis: dict | None = None
-    duplicate_analysis: dict | None = None
+    duplicate_analysis: dict | None = None  

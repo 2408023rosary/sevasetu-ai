@@ -29,24 +29,64 @@ def health():
     }
 
 
+@app.post("/analyze", response_model=AnalysisResponse)
+async def analyze_complaint(
+    text: str = Form(...),
+    existing_complaints: str = Form("[]"),
+    image: UploadFile | None = File(None),
+):
+    classification = classify_complaint(text)
+
+    priority = predict_priority(
+        text,
+        classification["category"]
+    )
+
+    image_result = None
+
+    if image is not None:
+        image_bytes = await image.read()
+        image_result = analyze_image(image_bytes)
+
+    try:
+        complaints = json.loads(existing_complaints)
+
+        if not isinstance(complaints, list):
+            complaints = []
+
+    except json.JSONDecodeError:
+        complaints = []
+
+    duplicate_result = detect_duplicate(
+        text,
+        complaints
+    )
+
+    return {
+        "category": classification["category"],
+        "category_confidence": classification["confidence"],
+        "priority": priority["priority"],
+        "priority_score": priority["score"],
+        "priority_reasons": priority["reasons"],
+        "image_analysis": image_result,
+        "duplicate_analysis": duplicate_result,
+    }
+
+
 @app.post("/analyze-json", response_model=AnalysisResponse)
 async def analyze_complaint_json(request: ComplaintRequest):
-    # Step 1: Classify complaint
     classification = classify_complaint(request.text)
 
-    # Step 2: Predict priority
     priority = predict_priority(
         request.text,
         classification["category"]
     )
 
-    # Step 3: Detect duplicate complaint
     duplicate_result = detect_duplicate(
         request.text,
         request.existing_complaints
     )
 
-    # Step 4: Return combined AI result
     return {
         "category": classification["category"],
         "category_confidence": classification["confidence"],

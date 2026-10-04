@@ -1,0 +1,12 @@
+Purpose
+Architecture
+Folder structure
+Installation
+Virtual environment
+Running server
+API endpoints
+Request examples
+Response examples
+Testing
+Limitations
+Integration instructions
