@@ -1,0 +1,9 @@
+USE sevasetu;
+INSERT INTO departments(id,name,description,contact_email,contact_phone,is_active,created_at,updated_at) VALUES
+(UUID(),'Public Works','Roads and public infrastructure','publicworks@sevasetu.local','1800000001',1,NOW(),NOW()),(UUID(),'Sanitation','Waste and sanitation services','sanitation@sevasetu.local','1800000002',1,NOW(),NOW()),(UUID(),'Water Supply','Water supply complaints','water@sevasetu.local','1800000003',1,NOW(),NOW()),(UUID(),'Electricity','Street lighting and electricity issues','electricity@sevasetu.local','1800000004',1,NOW(),NOW()),(UUID(),'Roads','Traffic and road operations','roads@sevasetu.local','1800000005',1,NOW(),NOW()),(UUID(),'Drainage','Drainage and stormwater services','drainage@sevasetu.local','1800000006',1,NOW(),NOW()),(UUID(),'Municipal Services','General municipal services','municipal@sevasetu.local','1800000007',1,NOW(),NOW());
+-- Development credentials use the bcrypt hash for the documented password: password
+INSERT INTO users(id,full_name,email,phone,password_hash,role,address,city,state,pincode,is_active,created_at,updated_at) VALUES
+(UUID(),'Demo Citizen','citizen@sevasetu.local','9000000001','$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy','CITIZEN','Demo Address','Pune','Maharashtra','411001',1,NOW(),NOW()),
+(UUID(),'Demo Officer','officer@sevasetu.local','9000000002','$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy','OFFICER','Office','Pune','Maharashtra','411001',1,NOW(),NOW()),
+(UUID(),'Demo Admin','admin@sevasetu.local','9000000003','$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy','ADMIN','Office','Pune','Maharashtra','411001',1,NOW(),NOW()),
+(UUID(),'Demo Super Admin','superadmin@sevasetu.local','9000000004','$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy','SUPER_ADMIN','Office','Pune','Maharashtra','411001',1,NOW(),NOW());

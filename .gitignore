@@ -1,0 +1,33 @@
+# Dependencies
+backend/node_modules/
+
+# Environment variables / secrets
+backend/.env
+.env
+.env.local
+.env.*.local
+
+# Uploaded/generated files
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Test coverage
+coverage/
+
+# Temporary files
+*.tmp
+*.temp
