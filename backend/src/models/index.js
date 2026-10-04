@@ -1,0 +1,9 @@
+const sequelize=require('../config/database'); const User=require('./User'); const Department=require('./Department'); const Complaint=require('./Complaint'); const ComplaintStatusHistory=require('./ComplaintStatusHistory'); const ComplaintImage=require('./ComplaintImage'); const Notification=require('./Notification'); const RefreshToken=require('./RefreshToken');
+User.hasMany(Complaint,{foreignKey:'citizenId',as:'complaints'}); Complaint.belongsTo(User,{foreignKey:'citizenId',as:'citizen'});
+Department.hasMany(Complaint,{foreignKey:'departmentId',as:'complaints'}); Complaint.belongsTo(Department,{foreignKey:'departmentId',as:'department'});
+User.hasMany(Complaint,{foreignKey:'assignedOfficerId',as:'assignedComplaints'}); Complaint.belongsTo(User,{foreignKey:'assignedOfficerId',as:'assignedOfficer'});
+Complaint.hasMany(ComplaintStatusHistory,{foreignKey:'complaintId',as:'history',onDelete:'CASCADE'}); ComplaintStatusHistory.belongsTo(Complaint,{foreignKey:'complaintId',as:'complaint'}); ComplaintStatusHistory.belongsTo(User,{foreignKey:'changedBy',as:'changer'});
+Complaint.hasMany(ComplaintImage,{foreignKey:'complaintId',as:'images',onDelete:'CASCADE'}); ComplaintImage.belongsTo(Complaint,{foreignKey:'complaintId',as:'complaint'});
+User.hasMany(Notification,{foreignKey:'userId',as:'notifications'}); Notification.belongsTo(User,{foreignKey:'userId',as:'user'}); Complaint.hasMany(Notification,{foreignKey:'complaintId',as:'notifications'}); Notification.belongsTo(Complaint,{foreignKey:'complaintId',as:'complaint'});
+User.hasMany(RefreshToken,{foreignKey:'userId',as:'refreshTokens',onDelete:'CASCADE'}); RefreshToken.belongsTo(User,{foreignKey:'userId',as:'user'});
+module.exports={sequelize,User,Department,Complaint,ComplaintStatusHistory,ComplaintImage,Notification,RefreshToken};
