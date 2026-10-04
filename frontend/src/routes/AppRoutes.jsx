@@ -13,19 +13,41 @@ import ProtectedRoute from "./ProtectedRoute";
 function AppRoutes() {
   return (
     <Routes>
+
+      {/* Public routes */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
+      {/* Protected citizen routes */}
       <Route element={<ProtectedRoute />}>
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/create-complaint" element={<CreateComplaint />} />
-        <Route path="/my-complaints" element={<MyComplaints />} />
+
+        <Route
+          path="/dashboard"
+          element={<Dashboard />}
+        />
+
+        <Route
+          path="/create-complaint"
+          element={<CreateComplaint />}
+        />
+
+        <Route
+          path="/my-complaints"
+          element={<MyComplaints />}
+        />
+
         <Route
           path="/complaints/:id"
           element={<ComplaintDetails />}
         />
-        <Route path="/profile" element={<Profile />} />
+
+        <Route
+          path="/profile"
+          element={<Profile />}
+        />
+
       </Route>
+
     </Routes>
   );
 }
