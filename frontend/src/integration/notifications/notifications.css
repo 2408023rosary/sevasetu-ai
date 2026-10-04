@@ -1,0 +1,45 @@
+.notification-panel {
+  width: 100%;
+  max-width: 500px;
+  padding: 16px;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+.notification-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.notification-header h3 {
+  margin: 0;
+}
+
+.notification-item {
+  padding: 12px;
+  margin-bottom: 10px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+}
+
+.notification-item p {
+  margin: 6px 0;
+}
+
+.notification-item.unread {
+  font-weight: 500;
+}
+
+.notification-item.read {
+  opacity: 0.7;
+}
+
+.notification-item button,
+.notification-header button {
+  padding: 6px 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
