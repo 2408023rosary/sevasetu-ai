@@ -2,3 +2,6 @@ fastapi
 uvicorn
 python-dotenv
 pydantic
+pytest
+pillow
+python-multipart
