@@ -1,0 +1,309 @@
+[1mdiff --cc database/README.md[m
+[1mindex 6f24fed,bae5fe7..0000000[m
+[1m--- a/database/README.md[m
+[1m+++ b/database/README.md[m
+[36m@@@ -1,95 -1,21 +1,119 @@@[m
+[32m++<<<<<<< ours[m
+[32m +# Member 4 — Database[m
+[32m +[m
+[32m +## CitizenCare Complaint Management System[m
+[32m +[m
+[32m +This folder is the database deliverable for **Member 4**. It contains the database architecture, table definitions, relationships, demo/seed data, and database documentation.[m
+[32m +[m
+[32m +### Files[m
+[32m +[m
+[32m +- `schema.sql` — Creates the MySQL database, tables, constraints, indexes, and relationships.[m
+[32m +- `seed.sql` — Inserts demo administrators, departments, employees, and complaints.[m
+[32m +- `README.md` — Database documentation and setup instructions.[m
+[32m +[m
+[32m +## Database[m
+[32m +[m
+[32m +**DBMS:** MySQL 8+[m
+[32m +[m
+[32m +**Database name:** `citizen_complaints`[m
+[32m +[m
+[32m +### Tables[m
+[32m +[m
+[32m +1. **admins** — administrator login/account data.[m
+[32m +2. **departments** — government/service departments.[m
+[32m +3. **employees** — workers assigned to departments.[m
+[32m +4. **complaints** — citizen complaints, status, assignment, priority, and AI classification results.[m
+[32m +[m
+[32m +### Relationships[m
+[32m +[m
+[32m +- `employees.department_id` → `departments.id`[m
+[32m +- `complaints.department_id` → `departments.id`[m
+[32m +- `complaints.employee_id` → `employees.id`[m
+[32m +[m
+[32m +The foreign keys use `ON DELETE SET NULL`, so removing a department or employee does not delete historical complaints.[m
+[32m +[m
+[32m +### Complaint / AI fields[m
+[32m +[m
+[32m +The `complaints` table stores:[m
+[32m +[m
+[32m +- Citizen name and email[m
+[32m +- Complaint title and description[m
+[32m +- Original category[m
+[32m +- `ai_category` for AI classification[m
+[32m +- `severity` (`Low`, `Medium`, `High`, `Critical`)[m
+[32m +- `priority_score` (0–100)[m
+[32m +- Location and optional image path[m
+[32m +- Complaint status (`Pending`, `In Progress`, `Resolved`, `Rejected`, `Reopened`)[m
+[32m +- Department and employee assignment[m
+[32m +- Created and resolved timestamps[m
+[32m +[m
+[32m +### User storage[m
+[32m +[m
+[32m +The current backend has two account types:[m
+[32m +[m
+[32m +- `admins` for administrators[m
+[32m +- `employees` for workers[m
+[32m +[m
+[32m +Citizen identity/contact information is currently stored with each complaint (`citizen_name`, `citizen_email`) because the existing backend does not use a separate citizen account table. This keeps the schema compatible with the current APIs.[m
+[32m +[m
+[32m +## Setup in MySQL / XAMPP[m
+[32m +[m
+[32m +1. Start **MySQL** in XAMPP.[m
+[32m +2. Open phpMyAdmin or the MySQL command line.[m
+[32m +3. Run `schema.sql` first.[m
+[32m +4. Run `seed.sql` second.[m
+[32m +5. Configure the backend `.env` values:[m
+[32m +[m
+[32m +```env[m
+[32m +DB_HOST=localhost[m
+[32m +DB_USER=root[m
+[32m +DB_PASSWORD=[m
+[32m +DB_PORT=3306[m
+[32m +DB_NAME=citizen_complaints[m
+[32m +```[m
+[32m +[m
+[32m +6. Start the backend from the `backend` folder.[m
+[32m +[m
+[32m +The existing `backend/db.js` also creates the MySQL schema automatically when `initializeDatabase()` is used.[m
+[32m +[m
+[32m +## Demo accounts[m
+[32m +[m
+[32m +Admin:[m
+[32m +[m
+[32m +- Email: `admin@gmail.com`[m
+[32m +- Password: `admin123`[m
+[32m +[m
+[32m +Demo worker password:[m
+[32m +[m
+[32m +- `worker123`[m
+[32m +[m
+[32m +## Backend coordination note[m
+[32m +[m
+[32m +The schema intentionally matches the current MySQL structure used by `backend/db.js` and the complaint/auth/worker/dashboard API queries. Before changing columns, status values, or foreign-key relationships, coordinate with the Backend member because those API queries depend on these names and values.[m
+[32m +[m
+[32m +### Important current-project note[m
+[32m +[m
+[32m +The repository also contains `backend/server.js`, which includes a separate SQLite implementation (`backend/data/citizencare.sqlite`). The MySQL schema in this folder is aligned with `backend/db.js` and the Express route files. The team should use **one database implementation consistently** before the final integration/demo; do not maintain MySQL and SQLite as two competing production databases.[m
+[32m++=======[m
+[32m+ # SevaSetu Database[m
+[32m+ [m
+[32m+ MySQL 8.0+ database schema for the SevaSetu AI backend. Database name: `sevasetu`.[m
+[32m+ [m
+[32m+ ## Setup[m
+[32m+ [m
+[32m+ 1. Create the schema: `mysql -u root -p < database/schema.sql`[m
+[32m+ 2. Load development data: `mysql -u root -p sevasetu < database/seed.sql`[m
+[32m+ 3. Configure `backend/.env` with the same DB credentials.[m
+[32m+ [m
+[32m+ The SQL schema mirrors the Sequelize models in `backend/src/models/`.[m
+[32m+ [m
+[32m+ ## Development credentials[m
+[32m+ [m
+[32m+ All seeded accounts use password `password` and local-only addresses/contacts:[m
+[32m+ - citizen@sevasetu.local — CITIZEN[m
+[32m+ - officer@sevasetu.local — OFFICER[m
+[32m+ - admin@sevasetu.local — ADMIN[m
+[32m+ - superadmin@sevasetu.local — SUPER_ADMIN[m
+[32m+ [m
+[32m+ Change or remove seed credentials before any real deployment.[m
+[32m++>>>>>>> theirs[m
+[1mdiff --cc database/schema.sql[m
+[1mindex deecaac,93aab76..0000000[m
+[1m--- a/database/schema.sql[m
+[1m+++ b/database/schema.sql[m
+[36m@@@ -1,61 -1,8 +1,72 @@@[m
+[32m++<<<<<<< ours[m
+[32m +-- CitizenCare Database Schema[m
+[32m +-- Member 4: Database[m
+[32m +-- Target DBMS: MySQL 8+[m
+[32m +[m
+[32m +CREATE DATABASE IF NOT EXISTS citizen_complaints;[m
+[32m +USE citizen_complaints;[m
+[32m +[m
+[32m +CREATE TABLE IF NOT EXISTS admins ([m
+[32m +  id INT AUTO_INCREMENT PRIMARY KEY,[m
+[32m +  name VARCHAR(100) NOT NULL,[m
+[32m +  email VARCHAR(150) NOT NULL UNIQUE,[m
+[32m +  password VARCHAR(255) NOT NULL,[m
+[32m +  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP[m
+[32m +);[m
+[32m +[m
+[32m +CREATE TABLE IF NOT EXISTS departments ([m
+[32m +  id INT AUTO_INCREMENT PRIMARY KEY,[m
+[32m +  name VARCHAR(100) NOT NULL UNIQUE[m
+[32m +);[m
+[32m +[m
+[32m +CREATE TABLE IF NOT EXISTS employees ([m
+[32m +  id INT AUTO_INCREMENT PRIMARY KEY,[m
+[32m +  name VARCHAR(100) NOT NULL,[m
+[32m +  email VARCHAR(150) UNIQUE,[m
+[32m +  password VARCHAR(255) NOT NULL DEFAULT 'worker123',[m
+[32m +  department_id INT NULL,[m
+[32m +  CONSTRAINT fk_employee_department[m
+[32m +    FOREIGN KEY (department_id) REFERENCES departments(id)[m
+[32m +    ON DELETE SET NULL ON UPDATE CASCADE[m
+[32m +);[m
+[32m +[m
+[32m +CREATE TABLE IF NOT EXISTS complaints ([m
+[32m +  id INT AUTO_INCREMENT PRIMARY KEY,[m
+[32m +  citizen_name VARCHAR(100) NOT NULL,[m
+[32m +  citizen_email VARCHAR(150),[m
+[32m +  title VARCHAR(200) NOT NULL,[m
+[32m +  description TEXT NOT NULL,[m
+[32m +  category VARCHAR(100) NOT NULL,[m
+[32m +  ai_category VARCHAR(100),[m
+[32m +  severity ENUM('Low','Medium','High','Critical') DEFAULT 'Medium',[m
+[32m +  priority_score INT DEFAULT 50,[m
+[32m +  location VARCHAR(200),[m
+[32m +  image VARCHAR(255),[m
+[32m +  status ENUM('Pending','In Progress','Resolved','Rejected','Reopened') DEFAULT 'Pending',[m
+[32m +  department_id INT NULL,[m
+[32m +  employee_id INT NULL,[m
+[32m +  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,[m
+[32m +  resolved_at DATETIME NULL,[m
+[32m +  CONSTRAINT fk_complaint_department[m
+[32m +    FOREIGN KEY (department_id) REFERENCES departments(id)[m
+[32m +    ON DELETE SET NULL ON UPDATE CASCADE,[m
+[32m +  CONSTRAINT fk_complaint_employee[m
+[32m +    FOREIGN KEY (employee_id) REFERENCES employees(id)[m
+[32m +    ON DELETE SET NULL ON UPDATE CASCADE,[m
+[32m +  CONSTRAINT chk_priority_score CHECK (priority_score BETWEEN 0 AND 100)[m
+[32m +);[m
+[32m +[m
+[32m +CREATE INDEX idx_complaints_status ON complaints(status);[m
+[32m +CREATE INDEX idx_complaints_department ON complaints(department_id);[m
+[32m +CREATE INDEX idx_complaints_employee ON complaints(employee_id);[m
+[32m +CREATE INDEX idx_complaints_created_at ON complaints(created_at);[m
+[32m++=======[m
+[32m+ CREATE DATABASE IF NOT EXISTS sevasetu CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; USE sevasetu;[m
+[32m+ CREATE TABLE users (id CHAR(36) PRIMARY KEY, full_name VARCHAR(120) NOT NULL, email VARCHAR(255) NOT NULL UNIQUE, phone VARCHAR(20), password_hash VARCHAR(255) NOT NULL, role ENUM('CITIZEN','ADMIN','OFFICER','SUPER_ADMIN') NOT NULL DEFAULT 'CITIZEN', address VARCHAR(255), city VARCHAR(100), state VARCHAR(100), pincode VARCHAR(10), is_active BOOLEAN NOT NULL DEFAULT TRUE, created_at DATETIME NOT NULL, updated_at DATETIME NOT NULL, INDEX idx_users_role(role));[m
+[32m+ CREATE TABLE departments (id CHAR(36) PRIMARY KEY, name VARCHAR(120) NOT NULL UNIQUE, description TEXT, contact_email VARCHAR(255), contact_phone VARCHAR(20), is_active BOOLEAN NOT NULL DEFAULT TRUE, created_at DATETIME NOT NULL, updated_at DATETIME NOT NULL);[m
+[32m+ CREATE TABLE complaints (id CHAR(36) PRIMARY KEY, complaint_number VARCHAR(30) NOT NULL UNIQUE, citizen_id CHAR(36) NOT NULL, department_id CHAR(36), title VARCHAR(200) NOT NULL, description TEXT NOT NULL, category ENUM('ROADS','GARBAGE','WATER','DRAINAGE','ELECTRICITY','STREET_LIGHT','PUBLIC_PROPERTY','TRAFFIC','SANITATION','OTHER') NOT NULL DEFAULT 'OTHER', subcategory VARCHAR(120), latitude DECIMAL(10,7), longitude DECIMAL(10,7), address VARCHAR(255), city VARCHAR(100), state VARCHAR(100), pincode VARCHAR(10), severity ENUM('LOW','MEDIUM','HIGH','CRITICAL') NOT NULL DEFAULT 'MEDIUM', priority ENUM('LOW','MEDIUM','HIGH','URGENT') NOT NULL DEFAULT 'MEDIUM', status ENUM('SUBMITTED','UNDER_REVIEW','ASSIGNED','IN_PROGRESS','RESOLVED','REJECTED','REOPENED') NOT NULL DEFAULT 'SUBMITTED', ai_category VARCHAR(50), ai_confidence DECIMAL(5,4), ai_priority VARCHAR(20), ai_summary TEXT, assigned_officer_id CHAR(36), resolved_at DATETIME, created_at DATETIME NOT NULL, updated_at DATETIME NOT NULL, CONSTRAINT fk_complaint_citizen FOREIGN KEY(citizen_id) REFERENCES users(id), CONSTRAINT fk_complaint_department FOREIGN KEY(department_id) REFERENCES departments(id), CONSTRAINT fk_complaint_officer FOREIGN KEY(assigned_officer_id) REFERENCES users(id), INDEX idx_complaints_citizen(citizen_id), INDEX idx_complaints_department(department_id), INDEX idx_complaints_officer(assigned_officer_id), INDEX idx_complaints_status(status), INDEX idx_complaints_category(category), INDEX idx_complaints_priority(priority), INDEX idx_complaints_created(created_at));[m
+[32m+ CREATE TABLE complaint_status_history (id CHAR(36) PRIMARY KEY, complaint_id CHAR(36) NOT NULL, old_status VARCHAR(30), new_status VARCHAR(30) NOT NULL, changed_by CHAR(36) NOT NULL, remarks TEXT, created_at DATETIME NOT NULL, CONSTRAINT fk_history_complaint FOREIGN KEY(complaint_id) REFERENCES complaints(id) ON DELETE CASCADE, CONSTRAINT fk_history_user FOREIGN KEY(changed_by) REFERENCES users(id), INDEX idx_history_complaint(complaint_id));[m
+[32m+ CREATE TABLE complaint_images (id CHAR(36) PRIMARY KEY, complaint_id CHAR(36) NOT NULL, file_name VARCHAR(255) NOT NULL, file_path VARCHAR(500) NOT NULL, mime_type VARCHAR(100) NOT NULL, file_size INT NOT NULL, created_at DATETIME NOT NULL, CONSTRAINT fk_image_complaint FOREIGN KEY(complaint_id) REFERENCES complaints(id) ON DELETE CASCADE, INDEX idx_images_complaint(complaint_id));[m
+[32m+ CREATE TABLE notifications (id CHAR(36) PRIMARY KEY, user_id CHAR(36) NOT NULL, complaint_id CHAR(36), title VARCHAR(200) NOT NULL, message TEXT NOT NULL, type VARCHAR(50) NOT NULL, is_read BOOLEAN NOT NULL DEFAULT FALSE, created_at DATETIME NOT NULL, CONSTRAINT fk_notification_user FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE, CONSTRAINT fk_notification_complaint FOREIGN KEY(complaint_id) REFERENCES complaints(id) ON DELETE SET NULL, INDEX idx_notifications_user(user_id));[m
+[32m+ CREATE TABLE refresh_tokens (id CHAR(36) PRIMARY KEY, user_id CHAR(36) NOT NULL, token_hash CHAR(64) NOT NULL UNIQUE, expires_at DATETIME NOT NULL, revoked_at DATETIME, replaced_by_token_id CHAR(36), created_at DATETIME NOT NULL, CONSTRAINT fk_refresh_user FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE, CONSTRAINT fk_refresh_replaced FOREIGN KEY(replaced_by_token_id) REFERENCES refresh_tokens(id), INDEX idx_refresh_user(user_id), INDEX idx_refresh_expires(expires_at));[m
+[32m++>>>>>>> theirs[m
+[1mdiff --cc database/seed.sql[m
+[1mindex 2240e17,63e2fe3..0000000[m
+[1m--- a/database/seed.sql[m
+[1m+++ b/database/seed.sql[m
+[36m@@@ -1,91 -1,9 +1,103 @@@[m
+[32m++<<<<<<< ours[m
+[32m +-- CitizenCare Demo / Seed Data[m
+[32m +-- Run after schema.sql[m
+[32m +USE citizen_complaints;[m
+[32m +[m
+[32m +INSERT INTO admins (name, email, password)[m
+[32m +SELECT 'System Administrator', 'admin@gmail.com', 'admin123'[m
+[32m +WHERE NOT EXISTS (SELECT 1 FROM admins WHERE email = 'admin@gmail.com');[m
+[32m +[m
+[32m +INSERT INTO departments (name)[m
+[32m +SELECT 'Roads & Infrastructure' WHERE NOT EXISTS (SELECT 1 FROM departments WHERE name='Roads & Infrastructure');[m
+[32m +INSERT INTO departments (name)[m
+[32m +SELECT 'Sanitation' WHERE NOT EXISTS (SELECT 1 FROM departments WHERE name='Sanitation');[m
+[32m +INSERT INTO departments (name)[m
+[32m +SELECT 'Water Supply' WHERE NOT EXISTS (SELECT 1 FROM departments WHERE name='Water Supply');[m
+[32m +INSERT INTO departments (name)[m
+[32m +SELECT 'Electricity' WHERE NOT EXISTS (SELECT 1 FROM departments WHERE name='Electricity');[m
+[32m +INSERT INTO departments (name)[m
+[32m +SELECT 'Public Safety' WHERE NOT EXISTS (SELECT 1 FROM departments WHERE name='Public Safety');[m
+[32m +[m
+[32m +INSERT INTO employees (name,email,password,department_id)[m
+[32m +SELECT 'Rahul Naik','rahul@example.com','worker123',d.id FROM departments d WHERE d.name='Roads & Infrastructure'[m
+[32m +AND NOT EXISTS (SELECT 1 FROM employees WHERE email='rahul@example.com');[m
+[32m +INSERT INTO employees (name,email,password,department_id)[m
+[32m +SELECT 'Sneha Patil','sneha@example.com','worker123',d.id FROM departments d WHERE d.name='Sanitation'[m
+[32m +AND NOT EXISTS (SELECT 1 FROM employees WHERE email='sneha@example.com');[m
+[32m +INSERT INTO employees (name,email,password,department_id)[m
+[32m +SELECT 'Amit Sharma','amit@example.com','worker123',d.id FROM departments d WHERE d.name='Water Supply'[m
+[32m +AND NOT EXISTS (SELECT 1 FROM employees WHERE email='amit@example.com');[m
+[32m +INSERT INTO employees (name,email,password,department_id)[m
+[32m +SELECT 'Priya Desai','priya@example.com','worker123',d.id FROM departments d WHERE d.name='Electricity'[m
+[32m +AND NOT EXISTS (SELECT 1 FROM employees WHERE email='priya@example.com');[m
+[32m +INSERT INTO employees (name,email,password,department_id)[m
+[32m +SELECT 'Vikram Rao','vikram@example.com','worker123',d.id FROM departments d WHERE d.name='Public Safety'[m
+[32m +AND NOT EXISTS (SELECT 1 FROM employees WHERE email='vikram@example.com');[m
+[32m +[m
+[32m +-- Demo complaints. IDs are resolved through department/employee names so this seed does not depend on fixed IDs.[m
+[32m +INSERT INTO complaints[m
+[32m +(citizen_name,citizen_email,title,description,category,ai_category,severity,priority_score,location,status,department_id,employee_id,created_at,resolved_at)[m
+[32m +SELECT 'John Dsouza','john@example.com','Pothole near main road','Large pothole causing traffic problems.','Roads','Road Damage','High',85,'Margao','Pending',d.id,e.id,DATE_SUB(NOW(), INTERVAL 2 DAY),NULL[m
+[32m +FROM departments d JOIN employees e ON e.email='rahul@example.com'[m
+[32m +WHERE d.name='Roads & Infrastructure'[m
+[32m +AND NOT EXISTS (SELECT 1 FROM complaints WHERE title='Pothole near main road');[m
+[32m +[m
+[32m +INSERT INTO complaints[m
+[32m +(citizen_name,citizen_email,title,description,category,ai_category,severity,priority_score,location,status,department_id,employee_id,created_at,resolved_at)[m
+[32m +SELECT 'Anita Sharma','anita@example.com','Garbage not collected','Garbage has not been collected for three days.','Sanitation','Garbage','Medium',60,'Navelim','In Progress',d.id,e.id,DATE_SUB(NOW(), INTERVAL 5 DAY),NULL[m
+[32m +FROM departments d JOIN employees e ON e.email='sneha@example.com'[m
+[32m +WHERE d.name='Sanitation'[m
+[32m +AND NOT EXISTS (SELECT 1 FROM complaints WHERE title='Garbage not collected');[m
+[32m +[m
+[32m +INSERT INTO complaints[m
+[32m +(citizen_name,citizen_email,title,description,category,ai_category,severity,priority_score,location,status,department_id,employee_id,created_at,resolved_at)[m
+[32m +SELECT 'Rohan Naik','rohan@example.com','Street light not working','Street light is not working at night.','Electricity','Street Light','High',78,'Fatorda','Resolved',d.id,e.id,DATE_SUB(NOW(), INTERVAL 12 DAY),DATE_SUB(NOW(), INTERVAL 8 DAY)[m
+[32m +FROM departments d JOIN employees e ON e.email='priya@example.com'[m
+[32m +WHERE d.name='Electricity'[m
+[32m +AND NOT EXISTS (SELECT 1 FROM complaints WHERE title='Street light not working');[m
+[32m +[m
+[32m +INSERT INTO complaints[m
+[32m +(citizen_name,citizen_email,title,description,category,ai_category,severity,priority_score,location,status,department_id,employee_id,created_at,resolved_at)[m
+[32m +SELECT 'Maria Fernandes','maria@example.com','Water leakage','Water is leaking continuously near the public tap.','Water Supply','Water Leakage','Critical',95,'Colva','Pending',d.id,e.id,DATE_SUB(NOW(), INTERVAL 1 DAY),NULL[m
+[32m +FROM departments d JOIN employees e ON e.email='amit@example.com'[m
+[32m +WHERE d.name='Water Supply'[m
+[32m +AND NOT EXISTS (SELECT 1 FROM complaints WHERE title='Water leakage');[m
+[32m +[m
+[32m +INSERT INTO complaints[m
+[32m +(citizen_name,citizen_email,title,description,category,ai_category,severity,priority_score,location,status,department_id,employee_id,created_at,resolved_at)[m
+[32m +SELECT 'Karan Mehta','karan@example.com','Broken footpath','Broken footpath is difficult for pedestrians.','Roads','Road Damage','Low',35,'Margao','Rejected',d.id,e.id,DATE_SUB(NOW(), INTERVAL 20 DAY),NULL[m
+[32m +FROM departments d JOIN employees e ON e.email='rahul@example.com'[m
+[32m +WHERE d.name='Roads & Infrastructure'[m
+[32m +AND NOT EXISTS (SELECT 1 FROM complaints WHERE title='Broken footpath');[m
+[32m +[m
+[32m +INSERT INTO complaints[m
+[32m +(citizen_name,citizen_email,title,description,category,ai_category,severity,priority_score,location,status,department_id,employee_id,created_at,resolved_at)[m
+[32m +SELECT 'Neha Verma','neha@example.com','Overflowing garbage bin','Public garbage bin is overflowing.','Sanitation','Garbage','Medium',55,'Chinchinim','Resolved',d.id,e.id,DATE_SUB(NOW(), INTERVAL 25 DAY),DATE_SUB(NOW(), INTERVAL 22 DAY)[m
+[32m +FROM departments d JOIN employees e ON e.email='sneha@example.com'[m
+[32m +WHERE d.name='Sanitation'[m
+[32m +AND NOT EXISTS (SELECT 1 FROM complaints WHERE title='Overflowing garbage bin');[m
+[32m +[m
+[32m +INSERT INTO complaints[m
+[32m +(citizen_name,citizen_email,title,description,category,ai_category,severity,priority_score,location,status,department_id,employee_id,created_at,resolved_at)[m
+[32m +SELECT 'Sanjay Kumar','sanjay@example.com','Dangerous junction','Traffic visibility is poor at this junction.','Public Safety','Traffic Hazard','Critical',90,'Ponda','In Progress',d.id,e.id,DATE_SUB(NOW(), INTERVAL 7 DAY),NULL[m
+[32m +FROM departments d JOIN employees e ON e.email='vikram@example.com'[m
+[32m +WHERE d.name='Public Safety'[m
+[32m +AND NOT EXISTS (SELECT 1 FROM complaints WHERE title='Dangerous junction');[m
+[32m +[m
+[32m +INSERT INTO complaints[m
+[32m +(citizen_name,citizen_email,title,description,category,ai_category,severity,priority_score,location,status,department_id,employee_id,created_at,resolved_at)[m
+[32m +SELECT 'Riya Shah','riya@example.com','Drainage blockage','Blocked drainage is causing water accumulation.','Sanitation','Drainage','High',82,'Margao','Reopened',d.id,e.id,DATE_SUB(NOW(), INTERVAL 15 DAY),NULL[m
+[32m +FROM departments d JOIN employees e ON e.email='sneha@example.com'[m
+[32m +WHERE d.name='Sanitation'[m
+[32m +AND NOT EXISTS (SELECT 1 FROM complaints WHERE title='Drainage blockage');[m
+[32m++=======[m
+[32m+ USE sevasetu;[m
+[32m+ INSERT INTO departments(id,name,description,contact_email,contact_phone,is_active,created_at,updated_at) VALUES[m
+[32m+ (UUID(),'Public Works','Roads and public infrastructure','publicworks@sevasetu.local','1800000001',1,NOW(),NOW()),(UUID(),'Sanitation','Waste and sanitation services','sanitation@sevasetu.local','1800000002',1,NOW(),NOW()),(UUID(),'Water Supply','Water supply complaints','water@sevasetu.local','1800000003',1,NOW(),NOW()),(UUID(),'Electricity','Street lighting and electricity issues','electricity@sevasetu.local','1800000004',1,NOW(),NOW()),(UUID(),'Roads','Traffic and road operations','roads@sevasetu.local','1800000005',1,NOW(),NOW()),(UUID(),'Drainage','Drainage and stormwater services','drainage@sevasetu.local','1800000006',1,NOW(),NOW()),(UUID(),'Municipal Services','General municipal services','municipal@sevasetu.local','1800000007',1,NOW(),NOW());[m
+[32m+ -- Development credentials use the bcrypt hash for the documented password: password[m
+[32m+ INSERT INTO users(id,full_name,email,phone,password_hash,role,address,city,state,pincode,is_active,created_at,updated_at) VALUES[m
+[32m+ (UUID(),'Demo Citizen','citizen@sevasetu.local','9000000001','$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy','CITIZEN','Demo Address','Pune','Maharashtra','411001',1,NOW(),NOW()),[m
+[32m+ (UUID(),'Demo Officer','officer@sevasetu.local','9000000002','$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy','OFFICER','Office','Pune','Maharashtra','411001',1,NOW(),NOW()),[m
+[32m+ (UUID(),'Demo Admin','admin@sevasetu.local','9000000003','$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy','ADMIN','Office','Pune','Maharashtra','411001',1,NOW(),NOW()),[m
+[32m+ (UUID(),'Demo Super Admin','superadmin@sevasetu.local','9000000004','$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy','SUPER_ADMIN','Office','Pune','Maharashtra','411001',1,NOW(),NOW());[m
+[32m++>>>>>>> theirs[m
