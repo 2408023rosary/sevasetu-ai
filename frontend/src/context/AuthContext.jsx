@@ -29,9 +29,9 @@ export function AuthProvider({ children }) {
       password,
     });
 
-    const { token, user } = response.data;
+    const { accessToken, user } = response.data.data;
 
-    localStorage.setItem("sevasetu_token", token);
+    localStorage.setItem("sevasetu_token", accessToken);
     localStorage.setItem("sevasetu_user", JSON.stringify(user));
 
     setUser(user);
@@ -42,9 +42,9 @@ export function AuthProvider({ children }) {
   const register = async (userData) => {
     const response = await api.post("/auth/register", userData);
 
-    const { token, user } = response.data;
+    const { accessToken, user } = response.data.data;
 
-    localStorage.setItem("sevasetu_token", token);
+    localStorage.setItem("sevasetu_token", accessToken);
     localStorage.setItem("sevasetu_user", JSON.stringify(user));
 
     setUser(user);
