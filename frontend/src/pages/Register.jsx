@@ -10,7 +10,7 @@ function Register() {
   const { register } = useAuth();
 
   const [form, setForm] = useState({
-    name: "",
+    full_name: "",
     email: "",
     password: "",
   });
@@ -35,10 +35,16 @@ function Register() {
       await register(form);
       navigate("/dashboard");
     } catch (error) {
-      setError(
-        error.response?.data?.message ||
-          "Unable to create your account."
-      );
+      const errors = error.response?.data?.errors;
+
+      if (errors?.length) {
+        setError(errors.map((err) => err.msg).join(", "));
+      } else {
+        setError(
+          error.response?.data?.message ||
+            "Unable to create your account."
+        );
+      }
     } finally {
       setLoading(false);
     }
@@ -54,8 +60,8 @@ function Register() {
 
         <InputField
           label="Full name"
-          name="name"
-          value={form.name}
+          name="full_name"
+          value={form.full_name}
           onChange={handleChange}
           placeholder="Your full name"
           required

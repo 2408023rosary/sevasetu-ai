@@ -1,0 +1,39 @@
+{
+  "name": "sevasetu-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SevaSetu AI public-service complaint management backend",
+  "main": "src/server.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js",
+    "test": "cross-env NODE_ENV=test DB_DIALECT=sqlite JWT_ACCESS_SECRET=test-access-secret-1234567890 JWT_REFRESH_SECRET=test-refresh-secret-1234567890 JWT_ACCESS_EXPIRES_IN=15m JWT_REFRESH_EXPIRES_IN=7d npm_config_loglevel=error jest --runInBand"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "express-validator": "^7.2.1",
+    "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
+    "multer": "^1.4.5-lts.1",
+    "mysql2": "^3.24.5",
+    "sequelize": "^6.37.8"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "jest": "^30.5.2",
+    "nodemon": "^1.14.10",
+    "sqlite3": "^6.0.1",
+    "supertest": "^7.0.0"
+  },
+  "allowScripts": {
+    "sqlite3@5.1.7": true
+  }
+}
